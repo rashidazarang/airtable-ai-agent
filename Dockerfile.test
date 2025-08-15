@@ -1,0 +1,25 @@
+# Minimal test Dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install basic dependencies
+RUN pip install --no-cache-dir \
+    asyncio \
+    aiohttp \
+    pydantic \
+    pyyaml \
+    rich
+
+# Copy source code
+COPY src/ ./src/
+COPY docs/ ./docs/
+COPY tests/ ./tests/
+
+# Set environment variables
+ENV PYTHONPATH=/app
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Test command
+CMD ["python", "-m", "src.agent_basic", "--test"]

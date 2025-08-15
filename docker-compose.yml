@@ -1,0 +1,154 @@
+version: '3.8'
+
+services:
+  airtable-ai-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: airtable-ai-agent
+    ports:
+      - "8000:8000"
+    environment:
+      - LOG_LEVEL=INFO
+      - MCP_SERVER_URL=http://airtable-mcp:8010/mcp
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_URL=postgresql://aiagent:password@postgres:5432/aiagent
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./.cache:/app/.cache
+    depends_on:
+      - redis
+      - postgres
+      - airtable-mcp
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - airtable-network
+
+  airtable-mcp:
+    build:
+      context: ../
+      dockerfile: Dockerfile.mcp
+    container_name: airtable-mcp
+    ports:
+      - "8010:8010"
+    environment:
+      - AIRTABLE_TOKEN=${AIRTABLE_TOKEN}
+      - AIRTABLE_BASE_ID=${AIRTABLE_BASE_ID}
+      - LOG_LEVEL=INFO
+    volumes:
+      - ../logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8010/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - airtable-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: airtable-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - airtable-network
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: airtable-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=aiagent
+      - POSTGRES_USER=aiagent
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aiagent -d aiagent"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - airtable-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: airtable-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - airtable-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: airtable-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    networks:
+      - airtable-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: airtable-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - airtable-ai-agent
+    restart: unless-stopped
+    networks:
+      - airtable-network
+
+volumes:
+  redis-data:
+  postgres-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  airtable-network:
+    driver: bridge
