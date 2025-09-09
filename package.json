@@ -1,0 +1,39 @@
+{
+  "name": "airtable-ai-agent",
+  "version": "1.0.0",
+  "description": "Comprehensive AI Agent for Airtable operations with MCP integration",
+  "main": "src/agent.py",
+  "scripts": {
+    "install-mcp": "npm install -g @rashidazarang/airtable-mcp@3.2.4",
+    "start-mcp": "npx @rashidazarang/airtable-mcp",
+    "test": "python -m pytest tests/",
+    "docker-build": "docker-compose build",
+    "docker-up": "docker-compose up -d",
+    "docker-down": "docker-compose down"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rashidazarang/airtable-ai-agent.git"
+  },
+  "keywords": [
+    "airtable",
+    "ai",
+    "agent",
+    "mcp",
+    "automation",
+    "natural-language"
+  ],
+  "author": "Rashid Azarang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rashidazarang/airtable-ai-agent/issues"
+  },
+  "homepage": "https://github.com/rashidazarang/airtable-ai-agent#readme",
+  "dependencies": {
+    "@rashidazarang/airtable-mcp": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  }
+}
