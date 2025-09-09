@@ -33,7 +33,7 @@ services:
 
   airtable-mcp:
     build:
-      context: ../
+      context: .
       dockerfile: Dockerfile.mcp
     container_name: airtable-mcp
     ports:

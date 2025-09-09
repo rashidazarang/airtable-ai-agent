@@ -13,7 +13,7 @@
 This AI Agent represents the **pinnacle of Airtable automation**, combining:
 
 - 🧠 **Complete Airtable API Knowledge** - Every endpoint, every parameter, every best practice
-- 🔗 **Perfect MCP Integration** - Seamless connection to our comprehensive 33-tool MCP server  
+- 🔗 **Perfect MCP Integration** - Seamless connection to our comprehensive 33-tool MCP server (v3.2.4)  
 - 🚀 **Advanced NLP** - Understand complex natural language queries about Airtable
 - ⚡ **Intelligent Context Management** - Optimal performance with 128k context window
 - 🎯 **Production Ready** - Docker, CI/CD, monitoring, security built-in
@@ -76,10 +76,9 @@ source venv/bin/activate
 # Install dependencies  
 pip install -r requirements.txt
 
-# Start MCP server (in separate terminal)
-cd ../
-npm install
-AIRTABLE_TOKEN="your_token" AIRTABLE_BASE_ID="your_base" node airtable_simple.js
+# Install and start MCP server v3.2.4 (in separate terminal)
+npm install -g @rashidazarang/airtable-mcp@3.2.4
+AIRTABLE_TOKEN="your_token" AIRTABLE_BASE_ID="your_base" npx @rashidazarang/airtable-mcp
 
 # Run the agent
 cd ai-agent

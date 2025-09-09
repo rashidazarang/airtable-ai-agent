@@ -180,17 +180,21 @@ docker-compose logs -f ai-agent
 #### MCP Server Setup
 
 ```bash
-# Clone MCP repository (separate project)
-git clone https://github.com/rashidazarang/airtable-mcp.git
-cd airtable-mcp
-
-# Install dependencies
-npm install
+# Install via NPM (recommended for v3.2.4)
+npm install -g @rashidazarang/airtable-mcp@3.2.4
 
 # Start MCP server
 AIRTABLE_TOKEN="your_token" \
 AIRTABLE_BASE_ID="your_base" \
-node airtable_simple.js
+npx @rashidazarang/airtable-mcp
+
+# Or clone from GitHub
+git clone https://github.com/rashidazarang/airtable-mcp.git
+cd airtable-mcp
+npm install
+AIRTABLE_TOKEN="your_token" \
+AIRTABLE_BASE_ID="your_base" \
+node src/javascript/airtable_simple_production.js
 ```
 
 #### AI Agent Setup
@@ -215,7 +219,10 @@ python -m src.agent
 
 1. **Install the MCP Server**:
 ```bash
-# Clone and set up MCP server
+# Install MCP server v3.2.4 via NPM (recommended)
+npm install -g @rashidazarang/airtable-mcp@3.2.4
+
+# Or clone from GitHub
 git clone https://github.com/rashidazarang/airtable-mcp.git
 cd airtable-mcp
 npm install
@@ -226,9 +233,9 @@ npm install
 {
   "mcpServers": {
     "airtable-mcp": {
-      "command": "node",
+      "command": "npx",
       "args": [
-        "/path/to/airtable-mcp/airtable_simple.js"
+        "@rashidazarang/airtable-mcp@3.2.4"
       ],
       "env": {
         "AIRTABLE_TOKEN": "your_personal_access_token",
